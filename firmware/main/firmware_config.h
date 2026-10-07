@@ -1,0 +1,66 @@
+#ifndef FIRMWARE_CONFIG_H
+#define FIRMWARE_CONFIG_H
+
+#include "sdkconfig.h"
+
+#define FIRMWARE_VERSION_MAJOR    1
+#define FIRMWARE_VERSION_MINOR    0
+#define FIRMWARE_VERSION_PATCH    0
+
+/**
+ * @brief Hardware Revision String (multi-target)
+ * CONFIG_IDF_TARGET_* is defined automatically via sdkconfig.h, so the
+ * build system labels itself correctly for whichever target chip is configured.
+ */
+#ifndef BOARD_MODULE_SUFFIX
+#define BOARD_MODULE_SUFFIX ""
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#define HARDWARE_REVISION "ESP32" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+#define HARDWARE_REVISION "ESP32-S2" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+#define HARDWARE_REVISION "ESP32-S3" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32C2)
+#define HARDWARE_REVISION "ESP32-C2" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#define HARDWARE_REVISION "ESP32-C3" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+#define HARDWARE_REVISION "ESP32-C6" BOARD_MODULE_SUFFIX
+#elif defined(CONFIG_IDF_TARGET_ESP32H2)
+#define HARDWARE_REVISION "ESP32-H2" BOARD_MODULE_SUFFIX
+#else
+#define HARDWARE_REVISION "ESP32-UNKNOWN-TARGET" BOARD_MODULE_SUFFIX
+#endif
+
+#define MONITORED_PARTITION_LABEL "factory"
+#define RUNTIME_CHECK_INTERVAL_MS 10000
+#define SECURE_LOG_MAX_ENTRIES    100
+
+#define USE_HARDWARE_SHA256_ACCEL 1
+#define ENFORCE_ANTI_ROLLBACK     1
+
+#define SECURITY_PANIC_REACTION   1
+
+#define ROLLBACK_NVS_NAMESPACE     "rb_prot"
+#define ROLLBACK_NVS_KEY_MIN_VER   "min_ver"
+#define ROLLBACK_BASELINE_VERSION  1
+
+#define REFHASH_NVS_NAMESPACE      "ref_hash"
+#define REFHASH_NVS_KEY            "golden"
+
+#define LOG_NVS_NAMESPACE          "sec_log"
+#define LOG_NVS_KEY_COUNT          "count"
+#define LOG_NVS_KEY_HEAD           "head"
+#define LOG_ENTRY_MSG_MAX_LEN      64
+
+#ifndef ENABLE_TAMPER_SIMULATION
+#ifdef CONFIG_ENABLE_TAMPER_SIMULATION
+#define ENABLE_TAMPER_SIMULATION 1
+#else
+#define ENABLE_TAMPER_SIMULATION 0
+#endif
+#endif
+
+#endif // FIRMWARE_CONFIG_H

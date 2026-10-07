@@ -1,0 +1,174 @@
+services:
+  # Main Dashboard (Simulation mode - no hardware required)
+  dashboard:
+    build: ./dashboard
+    image: firmware-integrity-dashboard:latest
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./exports:/data/exports
+
+  # Hardware Dashboard (with serial port passthrough)
+  dashboard-hw:
+    profiles: ["hw"]
+    build: ./dashboard
+    image: firmware-integrity-dashboard:latest
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./exports:/data/exports
+    devices:
+      - ${PORT:-/dev/ttyUSB0}:${PORT:-/dev/ttyUSB0}
+
+  dashboard-package-linux:
+    profiles: ["tools"]
+    build:
+      context: ./dashboard
+      dockerfile: packaging/Dockerfile.build
+    image: firmware-integrity-dashboard-builder:latest
+    volumes:
+      - ./dashboard:/build
+      - ./dashboard/dist:/output/dist
+
+  # Firmware Services
+  firmware-build-slim:
+    profiles: ["tools"]
+    build:
+      context: ./firmware
+      dockerfile: docker/Dockerfile.slim
+    image: esp32-idf-slim:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    environment:
+      - IDF_CCACHE_ENABLE=1
+      - CCACHE_MAXSIZE=2G
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py set-target esp32 && idf.py build"
+
+  firmware-build:
+    profiles: ["tools"]
+    image: espressif/idf:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    environment:
+      - IDF_CCACHE_ENABLE=1
+      - CCACHE_MAXSIZE=2G
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py set-target esp32 && idf.py build"
+
+  firmware-flash:
+    profiles: ["hw"]
+    image: espressif/idf:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    devices:
+      - ${PORT:-/dev/ttyUSB0}:${PORT:-/dev/ttyUSB0}
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py -p ${PORT:-/dev/ttyUSB0} flash"
+
+  firmware-flash-slim:
+    profiles: ["hw"]
+    build:
+      context: ./firmware
+      dockerfile: docker/Dockerfile.slim
+    image: esp32-idf-slim:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    devices:
+      - ${PORT:-/dev/ttyUSB0}:${PORT:-/dev/ttyUSB0}
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py -p ${PORT:-/dev/ttyUSB0} flash"
+
+  firmware-monitor:
+    profiles: ["hw"]
+    image: espressif/idf:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+    devices:
+      - ${PORT:-/dev/ttyUSB0}:${PORT:-/dev/ttyUSB0}
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py -p ${PORT:-/dev/ttyUSB0} monitor"
+
+  firmware-monitor-slim:
+    profiles: ["hw"]
+    build:
+      context: ./firmware
+      dockerfile: docker/Dockerfile.slim
+    image: esp32-idf-slim:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+    devices:
+      - ${PORT:-/dev/ttyUSB0}:${PORT:-/dev/ttyUSB0}
+    tty: true
+    stdin_open: true
+    command: sh -c "idf.py -p ${PORT:-/dev/ttyUSB0} monitor"
+
+  firmware-menuconfig:
+    profiles: ["tools"]
+    image: espressif/idf:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+    tty: true
+    stdin_open: true
+    command: idf.py menuconfig
+
+  firmware-menuconfig-slim:
+    profiles: ["tools"]
+    build:
+      context: ./firmware
+      dockerfile: docker/Dockerfile.slim
+    image: esp32-idf-slim:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+    tty: true
+    stdin_open: true
+    command: idf.py menuconfig
+
+  firmware-shell:
+    profiles: ["tools"]
+    image: espressif/idf:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    tty: true
+    stdin_open: true
+    command: bash
+
+  firmware-shell-slim:
+    profiles: ["tools"]
+    build:
+      context: ./firmware
+      dockerfile: docker/Dockerfile.slim
+    image: esp32-idf-slim:v5.3.1
+    working_dir: /project
+    volumes:
+      - ./firmware:/project
+      - idf-ccache:/root/.ccache
+    tty: true
+    stdin_open: true
+    command: bash
+
+volumes:
+  idf-ccache:

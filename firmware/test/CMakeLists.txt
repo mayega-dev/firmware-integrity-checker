@@ -1,0 +1,13 @@
+idf_component_register(
+    SRCS
+        "test_crypto.c"
+        "test_logger.c"
+        "test_rollback.c"
+    INCLUDE_DIRS
+        "."
+    PRIV_REQUIRES
+        unity
+        nvs_flash
+        main
+    WHOLE_ARCHIVE
+)

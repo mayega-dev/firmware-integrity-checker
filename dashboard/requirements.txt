@@ -1,0 +1,9 @@
+# PySide6-Essentials (not the full PySide6 metapackage) - this app only
+# uses QtCore/QtGui/QtWidgets, all covered by Essentials. The full PySide6
+# package additionally pulls in PySide6-Addons (QtWebEngine, QtMultimedia,
+# Qt3D, QtCharts, QtPdf, QtBluetooth, ...), none of which this code imports
+# - that's several hundred MB saved for zero functionality lost. Confirmed
+# by design: see widgets/timeline.py's docstring on deliberately avoiding
+# QtCharts for exactly this reason (plus import-reliability).
+PySide6-Essentials>=6.6
+pyserial>=3.5

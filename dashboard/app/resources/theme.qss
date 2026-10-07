@@ -1,0 +1,361 @@
+/* Firmware Integrity Monitor - dark theme
+   ------------------------------------------------------------------
+   Palette (kept in sync with app/models.py SEVERITY_COLORS and
+   app/widgets/status_hero.py's _STATE_TEXT - if you change a semantic
+   color here, change it in both of those too):
+
+     background       #0b0d12   page background
+     surface          #14171f   sidebar, inputs, table body
+     surface-raised   #1a1e29   cards
+     surface-hover    #1f2430   hovered rows/buttons
+     border           #262b38   default border
+     border-subtle    #1c2029   quieter divider
+     text-primary     #edeff3
+     text-secondary   #98a2b3
+     text-tertiary    #6b7385
+     accent           #5b8cff   interactive / primary
+     accent-hover     #7aa2ff
+     success          #34d399
+     warning          #fbbf24
+     critical         #ef4444
+
+   Type scale (deliberate, not ad hoc - reuse these rather than picking
+   a new size per widget):
+
+     11px   micro-label   uppercase card/section titles, connection pill
+     12px   caption       table cells, form inputs, buttons, tooltips
+     13px   body          sidebar nav, checkboxes, page subtitle
+     15px   emphasis      sidebar app title
+     20px   heading       stat card values
+     24px   display       page title, status hero headline
+   ------------------------------------------------------------------ */
+
+* {
+    font-family: "Noto Sans", "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    color: #edeff3;
+    font-size: 12px;
+}
+
+QMainWindow, QWidget#centralWidget {
+    background-color: #0b0d12;
+}
+
+/* ---------- Sidebar ---------- */
+QWidget#sidebar {
+    background-color: #10131a;
+    border-right: 1px solid #1c2029;
+}
+
+QLabel#appTitle {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.1px;
+    padding: 20px 16px 4px 16px;
+}
+
+QLabel#appSubtitle {
+    font-size: 11px;
+    color: #6b7385;
+    padding: 0px 16px 20px 16px;
+}
+
+QPushButton#navButton {
+    text-align: left;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    margin: 2px 10px;
+    background-color: transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: #98a2b3;
+}
+
+QPushButton#navButton:hover {
+    background-color: #1a1e29;
+    color: #edeff3;
+}
+
+QPushButton#navButton:checked {
+    background-color: rgba(91, 140, 255, 0.16);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* ---------- Connection pill ---------- */
+QLabel#connPillConnected {
+    background-color: rgba(52, 211, 153, 0.14);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+QLabel#connPillDisconnected {
+    background-color: rgba(152, 162, 179, 0.12);
+    color: #98a2b3;
+    border: 1px solid rgba(152, 162, 179, 0.3);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+QLabel#connPillError {
+    background-color: rgba(239, 68, 68, 0.14);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* ---------- Cards / surfaces ---------- */
+QFrame#card {
+    background-color: #14171f;
+    border: 1px solid #1c2029;
+    border-radius: 12px;
+}
+
+QLabel#cardTitle {
+    color: #6b7385;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+}
+
+QLabel#cardValue {
+    color: #edeff3;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+QLabel#pageTitle {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    padding: 4px 0px 2px 0px;
+}
+
+QLabel#pageSubtitle {
+    color: #98a2b3;
+    font-size: 13px;
+    padding-bottom: 10px;
+}
+
+/* ---------- Status hero ---------- */
+QLabel#statusHeroSafe {
+    color: #34d399;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+QLabel#statusHeroWarning {
+    color: #fbbf24;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+QLabel#statusHeroCritical {
+    color: #ef4444;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+QLabel#statusHeroUnknown {
+    color: #98a2b3;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* ---------- Buttons ---------- */
+QPushButton {
+    background-color: #1a1e29;
+    border: 1px solid #262b38;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+QPushButton:hover {
+    background-color: #232a3a;
+    border-color: #2e3547;
+}
+
+QPushButton:pressed {
+    background-color: #171a22;
+}
+
+QPushButton:disabled {
+    color: #4a5163;
+    background-color: #12151c;
+    border-color: #1c2029;
+}
+
+QPushButton#primaryButton {
+    background-color: #5b8cff;
+    border: 1px solid #5b8cff;
+    color: #ffffff;
+}
+
+QPushButton#primaryButton:hover {
+    background-color: #7aa2ff;
+    border-color: #7aa2ff;
+}
+
+QPushButton#primaryButton:pressed {
+    background-color: #4a76e0;
+}
+
+QPushButton#dangerButton {
+    background-color: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+}
+
+QPushButton#dangerButton:hover {
+    background-color: rgba(239, 68, 68, 0.12);
+}
+
+/* ---------- Inputs ---------- */
+QComboBox, QLineEdit, QSpinBox {
+    background-color: #14171f;
+    border: 1px solid #262b38;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    selection-background-color: #5b8cff;
+}
+
+QComboBox:hover, QLineEdit:hover, QSpinBox:hover {
+    border-color: #333a4d;
+}
+
+QComboBox:focus, QLineEdit:focus, QSpinBox:focus {
+    border-color: #5b8cff;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 22px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #1a1e29;
+    border: 1px solid #262b38;
+    selection-background-color: rgba(91, 140, 255, 0.25);
+    outline: none;
+}
+
+QCheckBox {
+    font-size: 13px;
+    spacing: 8px;
+}
+
+/* ---------- Table / log ---------- */
+QTableView {
+    background-color: #14171f;
+    alternate-background-color: #171a22;
+    gridline-color: #1c2029;
+    border: 1px solid #1c2029;
+    border-radius: 8px;
+    selection-background-color: rgba(91, 140, 255, 0.22);
+    selection-color: #ffffff;
+    font-size: 12px;
+}
+
+QHeaderView::section {
+    background-color: #171a22;
+    color: #6b7385;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #1c2029;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+QTableView::item {
+    padding: 6px;
+}
+
+/* ---------- Documentation ---------- */
+QTextBrowser#docsBrowser {
+    background-color: #14171f;
+    color: #edeff3;
+    border: 1px solid #1c2029;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 13px;
+}
+
+/* ---------- Console ---------- */
+QPlainTextEdit#console {
+    background-color: #07080b;
+    color: #c3cbd8;
+    border: 1px solid #1c2029;
+    border-radius: 8px;
+    font-family: "Cascadia Mono", "Consolas", "JetBrains Mono", "Courier New", monospace;
+    font-size: 12px;
+    padding: 8px;
+}
+
+/* ---------- Scrollbars ---------- */
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #262b38;
+    border-radius: 5px;
+    min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #333a4d;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #262b38;
+    border-radius: 5px;
+    min-width: 24px;
+}
+
+QToolTip {
+    background-color: #1a1e29;
+    color: #edeff3;
+    border: 1px solid #262b38;
+    padding: 4px 8px;
+    font-size: 12px;
+}
+
+QMessageBox {
+    background-color: #14171f;
+}
+
+QMessageBox QLabel {
+    font-size: 13px;
+}

@@ -1,0 +1,5 @@
+# Only needed to build the standalone executable - not needed to just run
+# `python main.py`. Install alongside the main requirements.txt:
+#   pip install -r requirements.txt -r packaging/requirements-build.txt
+pyinstaller>=6.6
+pyinstaller-hooks-contrib>=2024.6

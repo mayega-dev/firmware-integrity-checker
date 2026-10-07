@@ -1,0 +1,92 @@
+# Builds the standalone Linux executable inside a container - avoids
+# needing a native Python venv on the host, matches how the rest of this
+# project already works.
+#
+# Note on portability: this produces a binary linked against this image's
+# glibc/library versions (Debian "bookworm", matching python:3.11-slim).
+# It'll run on your build machine and similar-enough recent Debian/Ubuntu
+# systems, but isn't a universal "runs on every Linux distro" build (that
+# would need an old-glibc base like manylinux, which is more setup than
+# this project needs unless you're specifically distributing to unknown
+# target systems - flag this back if that becomes a real requirement).
+# Pinned to the exact digest already confirmed present in local Docker
+# storage (visible in every prior build log's "CACHED [1/6] FROM..." line).
+# A digest-pinned reference needs no registry round-trip to resolve -
+# unlike a floating tag like `python:3.11-slim`, which BuildKit still
+# checks against the registry even when a matching local image exists,
+# and fails the whole build if that specific network call times out
+# (confirmed: this is what was actually happening, not what `pull: false`
+# addresses - that only controls forcing a fresh pull, not this check).
+# If you ever need a newer base image, drop the @sha256:... part
+# temporarily, let it pull fresh once, then re-pin to the new digest.
+FROM python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libegl1 \
+    libxkbcommon-x11-0 \
+    libxkbcommon0 \
+    libfontconfig1 \
+    libfreetype6 \
+    libx11-xcb1 \
+    libxcb-cursor0 \
+    libxcb-icccm4 \
+    libxcb-image0 \
+    libxcb-keysyms1 \
+    libxcb-randr0 \
+    libxcb-render-util0 \
+    libxcb-shape0 \
+    libxcb-xinerama0 \
+    libxcb-xkb1 \
+    libxrender1 \
+    libxi6 \
+    libsm6 \
+    libice6 \
+    libdbus-1-3 \
+    libglib2.0-0 \
+    fonts-noto-core \
+    binutils \
+    # Not needed by this app at runtime - needed because PyInstaller's
+    # PySide6 hooks load *every* Qt submodule's hook script during
+    # analysis (to read what each one excludes), and some of those hook
+    # scripts run an isolated-process import of their module as a side
+    # effect at load time. QtNetwork's hook does this to detect OpenSSL
+    # support; that import fails without libgssapi_krb5.so.2 even though
+    # this app never touches QtNetwork. libcups2 covers the same class of
+    # issue for QtPrintSupport preemptively - if a different, unrelated
+    # Essentials module hits this same pattern, the fix is identical:
+    # add whichever .so the error names and rebuild.
+    libgssapi-krb5-2 \
+    libcups2 \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY requirements.txt packaging/requirements-build.txt ./
+# --timeout/--retries: pip's default 15s per-chunk read timeout is too
+# short on a slow connection and aborts mid-download rather than just
+# taking longer. This doesn't fix a slow/unstable connection, it just
+# stops pip from giving up on one prematurely.
+#
+# Split into one RUN per package (rather than one `pip install -r ...`
+# covering everything) so each successfully-installed package becomes its
+# own cached Docker layer. If a later package's download fails - a real
+# risk on an unstable connection, per an actual SSL record-layer error
+# hit here mid-build - re-running `docker compose build` resumes from the
+# last package that succeeded instead of re-downloading everything from
+# zero. PySide6-Essentials (~80MB, the wheel that's actually been failing)
+# gets its own line specifically so it isn't bundled with anything smaller.
+RUN pip install --no-cache-dir --timeout 180 --retries 15 "pyserial>=3.5"
+RUN pip install --no-cache-dir --timeout 180 --retries 15 "PySide6-Essentials>=6.6"
+RUN pip install --no-cache-dir --timeout 180 --retries 15 "pyinstaller>=6.6"
+RUN pip install --no-cache-dir --timeout 180 --retries 15 "pyinstaller-hooks-contrib>=2024.6"
+
+COPY . .
+
+# --distpath writes into /output/dist, which docker-compose.yml mounts
+# from the host - that's what makes the result show up outside the
+# container instead of vanishing when it exits.
+CMD ["pyinstaller", "--noconfirm", "--clean", \
+     "--distpath", "/output/dist", \
+     "--workpath", "/build/.pyinstaller-work", \
+     "packaging/dashboard.spec"]
